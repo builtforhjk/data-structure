@@ -11,6 +11,8 @@ ADT ScatterDiagram{
 	P:{
 		//初始化
 		Status STDiagram_init(ScatterDiagram * SD);
+		//剩余空间
+		type_size STDiagram_remainingSpace(Scatter_diagram * SD);
 		//查找
 		Iterator STDiagram_find(ScatterDiagram * SD, Point p);
 		//插入
@@ -41,6 +43,7 @@ typedef struct Point{
 typedef struct ScatterDiagram{
 	Point * base;
 	int size;
+	int totalSpace;
 }ScatterDiagram;
 typedef int Iterator;
 typedef int type_size;
@@ -50,7 +53,11 @@ Status STDiagram_init(ScatterDiagram * SD){
 	SD->base = (Point *)malloc(sizeof(Point)*MAX_SIZE);
 	if(!SD->base) return ERROR;
 	SD->size = 0;
+	SD->totalSpace = MAX_SIZE;
 	return OK;
+}
+type_size STDiagram_remainingSpace(ScatterDiagram *SD){
+	return SD->totalSpace - SD->size;
 }
 Iterator STDiagram_find(ScatterDiagram * SD, Point p){
 	Iterator itor;
@@ -85,7 +92,8 @@ Status STDiagram_resize(ScatterDiagram * SD,int increment){
 		SD->base[i].y = co[i].y;
 	}
 	free(co);
-	SD->size += increment;
+	co = NULL;
+	SD->totalSpace += increment;
 	return OK;
 }
 Status STDiagram_erase(ScatterDiagram * SD,Point p){
@@ -113,6 +121,7 @@ BOOL STDiagram_empty(ScatterDiagram * SD){
 Status STDiagram_clear(ScatterDiagram * SD){
 	if(!SD->base) return ERROR;
 	free(SD->base);
+	SD->base = NULL;
 	SD->base = (Point*)malloc(sizeof(Point)*MAX_SIZE);
 	SD->size = 0;
 	return OK;
@@ -141,7 +150,8 @@ int main(){
 	printf("-5: increase\n");
 	printf("-6: clear\n");
 	printf("-7: size\n");
-	printf("-8: quit\n");
+	printf("-8: remaining space\n");
+	printf("-9: quit\n");
 	int type;
 	while(1){
 		if(terminate == TRUE) break;
@@ -203,7 +213,12 @@ int main(){
 				printf("%d\n", STDiagram_size(&SD));
 				break;
 			}
-			case 8:
+			case 8: {
+				printf("Command: remaining space\n");
+				printf("%d\n",STDiagram_remainingSpace(&SD));
+				break;
+			}
+			case 9:
 				terminate = TRUE;
 				printf("Command: quit\n");
 				break;
